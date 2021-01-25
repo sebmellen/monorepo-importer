@@ -1,5 +1,6 @@
 #! /bin/bash
 
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 # STEP 1: Gather user input
 printf "What is the location of your monorepo?\n"
 read MONOREPO
@@ -11,9 +12,10 @@ read RTPIM
 
 # Definitions
 CHANGELOG='changelog.md'
-GIT_BRANCH_REGEX="((([-0-9a-zA-Z\/_?:.,]+)$)|(([-0-9a-zA-Z\/_?:.,]+(  ))$))"
 TOP_LEVEL_DIRECTORY=`echo $PWD`
+## GIT_BRANCH_REGEX="((([-0-9a-zA-Z\/_?:.,]+)$)|(([-0-9a-zA-Z\/_?:.,]+(  ))$))"
 
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 # STEP 2: Check paths
 # Create git repo if monorepo doesn't exist
 if [ ! -d "$MONOREPO" ]; then
@@ -27,9 +29,7 @@ if [ ! -d "$MONOREPO" ]; then
 	printf "\nCREATED NEW GIT REPOSITORY AT \"$MONOREPO\"."
 fi
 
-printf "$TOP_LEVEL_DIRECTORY"
-
-# Check RTPIM directory exists
+# Check $RTPIM directory exists
 if [ -d "$RTPIM" ]; then
 	cd $RTPIM
 else
@@ -37,17 +37,19 @@ else
 	exit
 fi
 
+# From https://stackoverflow.com/a/4754797
 for branch in $(git branch --all | grep '^\s*remotes' | egrep --invert-match '(:?HEAD|master)$'); do
     git branch --track "${branch##*/}" "$branch"
 done
-# ^ Taken from https://stackoverflow.com/a/4754797
 
 cd $TOP_LEVEL_DIRECTORY/$MONOREPO
 
+# Create changelog
 touch $CHANGELOG
-CHANGELOG_HEADER="## Add branches from monorepo to RTPIM"
+CHANGELOG_HEADER="## Add branches from $MONOREPO to $RTPIM"
 echo "$CHANGELOG_HEADER" >> $CHANGELOG
-printf "$CHANGELOG_HEADER"
+git add --all
+git commit -m "Create changelog"
 
 cd $TOP_LEVEL_DIRECTORY/$RTPIM
 
@@ -56,30 +58,24 @@ cd $TOP_LEVEL_DIRECTORY/$RTPIM
 git reset
 git checkout
 
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 # STEP 3: Gather all git branches from $RTPIM into array
-# Check for all branches of the repo and loop through them in succession
+# Get list of all local branches
 RAW_GIT_BRANCHES=`git branch`
-printf "$RAW_GIT_BRANCHES"
 
+# Format list of local branches into array
+# from https://unix.stackexchange.com/a/628576
 set -o noglob
 IFS=$'\n' ARRAY_GIT_BRANCHES=($RAW_GIT_BRANCHES)
 set +o noglob
-# ^ from https://unix.stackexchange.com/a/628576
 
-# A bunch of stuff I tried that didn't work
-# CLEANED_GIT_BRANCHES=$(echo $RAW_GIT_BRANCHES | grep -qE "{GIT_BRANCH_REGEX}")
-# IFS='\n\b' read -ra ARRAY_GIT_BRANCHES <<< "$rawGitBranches"
-# IFS=$'\n' read -rd '' -a ARRAY_GIT_BRANCHES <<<"$rawGitBranches"
-
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 # STEP 4: Loop through array of git branches and add each branch from $RTPIM as a subtree in $MONOREPO, in directory $MONOREPO/$RTPIM/$BRANCH_NAME
 for BRANCH in ${ARRAY_GIT_BRANCHES[@]} 
 do
-	
-	# Clean up git branch name using Regex
-	# IGNORE: BRANCH=$(echo "$BRANCH" | grep -E '((([-0-9a-zA-Z\/_?:.,]+)$)|(([-0-9a-zA-Z\/_?:.,]+(  ))$))')
+	# Clean up git branch name using Regex and sed
+	# from https://stackoverflow.com/a/6744040 and https://stackoverflow.com/a/51673105
 	BRANCH=$(sed 's/^[ *]*\([^ ]*\).*/\1/' <<< $BRANCH)
-	# https://stackoverflow.com/questions/51668837/remove-a-from-a-line-using-sed
-	# https://stackoverflow.com/questions/6744006/can-i-use-sed-to-manipulate-a-variable-in-bash
 	
 	FULLY_CLEANED_GIT_BRANCH_NAME=$(echo "$BRANCH" | awk '$1=$1')
 
@@ -112,3 +108,11 @@ printf "\n\nNew tree structure of your monorepo:\n`tree -L 2`"
 cd $TOP_LEVEL_DIRECTORY
 
 printf "\n\nFINISHED!!!\n"
+
+
+# A bunch of stuff I tried that didn't work
+
+## BRANCH=$(echo "$BRANCH" | grep -E '((([-0-9a-zA-Z\/_?:.,]+)$)|(([-0-9a-zA-Z\/_?:.,]+(  ))$))')
+## CLEANED_GIT_BRANCHES=$(echo $RAW_GIT_BRANCHES | grep -qE "{GIT_BRANCH_REGEX}")
+## IFS='\n\b' read -ra ARRAY_GIT_BRANCHES <<< "$RAW_GIT_BRANCHES"
+## IFS=$'\n' read -rd '' -a ARRAY_GIT_BRANCHES <<<"$RAW_GIT_BRANCHES"
