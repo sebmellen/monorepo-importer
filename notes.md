@@ -16,6 +16,11 @@ Commit name changes:
 
 - https://gist.github.com/bartoszmajsak/1396344
 - https://andy-carter.com/blog/automating-git-commit-messages-with-git-hooks
+- Using filter-branch http://www.janosgyerik.com/rewrite-git-history-to-prefix-a-range-of-commit-messages/
+- Git-filter-repo is a better alternative: https://github.com/newren/git-filter-repo/
+- Find first commit of branch: https://stackoverflow.com/questions/18407526/git-how-to-find-first-commit-of-specific-branch
+- https://stackoverflow.com/questions/14332551/whats-the-fastest-way-to-edit-hundreds-of-git-commit-messages
+- https://stackoverflow.com/questions/57525304/prepend-string-to-messages-of-a-range-of-git-commits
 
 ---
 

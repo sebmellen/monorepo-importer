@@ -46,7 +46,7 @@ cd $TOP_LEVEL_DIRECTORY/$MONOREPO
 
 # Create changelog
 touch $CHANGELOG
-CHANGELOG_HEADER="## Add branches from $MONOREPO to $RTPIM"
+CHANGELOG_HEADER="## Add branches from $RTPIM to $MONOREPO"
 echo "$CHANGELOG_HEADER" >> $CHANGELOG
 git add --all
 git commit -m "Create changelog"
@@ -77,21 +77,21 @@ do
 	# from https://stackoverflow.com/a/6744040 and https://stackoverflow.com/a/51673105
 	BRANCH=$(sed 's/^[ *]*\([^ ]*\).*/\1/' <<< $BRANCH)
 	
-	FULLY_CLEANED_GIT_BRANCH_NAME=$(echo "$BRANCH" | awk '$1=$1')
+	BRANCH_CLEAN_NAME=$(echo "$BRANCH" | awk '$1=$1')
 
-	printf "$FULLY_CLEANED_GIT_BRANCH_NAME"
+	printf "$BRANCH_CLEAN_NAME"
 
 	# Checkout the branch in the current loop, before heading back to the monorepo
-	git checkout $FULLY_CLEANED_GIT_BRANCH_NAME
+	git checkout $BRANCH_CLEAN_NAME
 
 	# Head to the monorepo and begin Git logic
 	cd $TOP_LEVEL_DIRECTORY/$MONOREPO
-	git subtree add --prefix=$RTPIM/$FULLY_CLEANED_GIT_BRANCH_NAME ../$RTPIM $FULLY_CLEANED_GIT_BRANCH_NAME
+	git subtree add --prefix=$RTPIM/$BRANCH_CLEAN_NAME ../$RTPIM $BRANCH_CLEAN_NAME
 	
 	# Report results
 	printf "\nADDED TO CHANGELOG: %s\n" 
 	CURRENT_DATE=`date +"%Y-%m-%d %T"`
-	CHANGELOG_MESSAGE="At $CURRENT_DATE, branch \"\`$FULLY_CLEANED_GIT_BRANCH_NAME\`\" from repository \"\`$RTPIM\`\" was added to monorepo: \"\`$MONOREPO\`\", in path \"\`$RTPIM/$FULLY_CLEANED_GIT_BRANCH_NAME\`\""
+	CHANGELOG_MESSAGE="At $CURRENT_DATE, branch \"\`$BRANCH_CLEAN_NAME\`\" from repository \"\`$RTPIM\`\" was added to monorepo: \"\`$MONOREPO\`\", in path \"\`$RTPIM/$BRANCH_CLEAN_NAME\`\""
 	printf "⦿ $CHANGELOG_MESSAGE \n"
 	echo "- $CHANGELOG_MESSAGE" >> $CHANGELOG
 
